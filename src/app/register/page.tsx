@@ -23,7 +23,7 @@ async function RegisterContent() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-semibold">Criar conta</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">Criar conta</h1>
       <ActionForm action={register} submitLabel="Criar conta" className="card space-y-4">
         <div>
           <label htmlFor="name" className="label">
@@ -60,9 +60,9 @@ async function RegisterContent() {
         </div>
         <SpecialtyCheckboxes specialties={specialties} />
       </ActionForm>
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-muted">
         Já tens conta?{' '}
-        <Link href="/login" className="text-indigo-700 hover:underline">
+        <Link href="/login" className="link">
           Entra
         </Link>
       </p>

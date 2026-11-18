@@ -30,12 +30,12 @@ export function ActionForm({ action, submitLabel, children, className }: Props) 
     >
       {children}
       {state?.error && (
-        <p ref={messageRef} tabIndex={-1} role="alert" className="text-sm text-red-600">
+        <p ref={messageRef} tabIndex={-1} role="alert" className="text-sm text-rose-400">
           {state.error}
         </p>
       )}
       {state?.success && (
-        <p ref={messageRef} tabIndex={-1} role="status" className="text-sm text-green-700">
+        <p ref={messageRef} tabIndex={-1} role="status" className="text-sm text-emerald-400">
           {state.success}
         </p>
       )}

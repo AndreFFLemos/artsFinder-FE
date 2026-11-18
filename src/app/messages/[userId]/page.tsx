@@ -1,7 +1,9 @@
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { ActionForm } from '@/components/action-form';
+import { Avatar } from '@/components/avatar';
 import { ConfirmButton } from '@/components/confirm-button';
 import { Loading } from '@/components/loading';
 import { MarkAsRead } from '@/components/mark-as-read';
@@ -46,27 +48,27 @@ async function ConversationContent(props: PageProps<'/messages/[userId]'>) {
   const subject = latest ? (latest.subject.startsWith('Re: ') ? latest.subject : `Re: ${latest.subject}`) : '';
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-2xl space-y-6">
       <MarkAsRead ids={unreadIds} />
-      <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-semibold">
-          Conversa com{' '}
-          <Link href={`/musicians/${other.id}`} className="text-indigo-700 hover:underline">
-            {other.name}
-          </Link>
-        </h1>
-        <div className="flex items-center gap-4 text-sm">
+      <div className="flex items-center justify-between gap-4">
+        <Link href={`/musicians/${other.id}`} className="flex min-w-0 items-center gap-3">
+          <Avatar id={other.id} name={other.name} />
+          <h1 className="truncate font-display text-2xl font-bold tracking-tight">{other.name}</h1>
+        </Link>
+        <div className="flex shrink-0 items-center gap-4 text-sm">
           {messages.length > 0 && (
             <form action={deleteConversation.bind(null, other.id)}>
               <ConfirmButton
                 message={`Apagar a conversa com ${other.name}? Será apagada também para a outra pessoa.`}
-                className="text-red-600 hover:underline"
+                className="inline-flex items-center gap-1 text-rose-400 hover:underline"
               >
-                Apagar conversa
+                <Trash2 className="size-3.5" aria-hidden="true" />
+                Apagar
               </ConfirmButton>
             </form>
           )}
-          <Link href="/messages" className="text-zinc-600 hover:underline">
+          <Link href="/messages" className="inline-flex items-center gap-1 text-muted hover:text-fg">
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
             Voltar
           </Link>
         </div>
@@ -77,10 +79,14 @@ async function ConversationContent(props: PageProps<'/messages/[userId]'>) {
           const mine = msg.sender.id === me.id;
           return (
             <li key={msg.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-lg px-4 py-2 ${mine ? 'bg-indigo-600 text-white' : 'border border-zinc-200 bg-white'}`}>
-                <p className={`text-xs font-medium ${mine ? 'text-indigo-100' : 'text-zinc-500'}`}>{msg.subject}</p>
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                  mine ? 'bg-gradient-brand rounded-br-sm text-white' : 'rounded-bl-sm border bg-raised'
+                }`}
+              >
+                <p className={`text-xs font-medium ${mine ? 'text-white/80' : 'text-muted'}`}>{msg.subject}</p>
                 <p className="text-sm whitespace-pre-line">{msg.message}</p>
-                <p className={`mt-1 text-xs ${mine ? 'text-indigo-200' : 'text-zinc-400'}`}>{formatDate(msg.createdAt)}</p>
+                <p className={`mt-1 text-xs ${mine ? 'text-white/60' : 'text-muted/70'}`}>{formatDate(msg.createdAt)}</p>
               </div>
             </li>
           );

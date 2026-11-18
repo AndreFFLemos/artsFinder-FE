@@ -1,6 +1,8 @@
+import { MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
+import { Avatar } from '@/components/avatar';
 import { Loading } from '@/components/loading';
 import { api } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -36,36 +38,42 @@ async function MessagesContent() {
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Mensagens</h1>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <h1 className="font-display text-3xl font-bold tracking-tight">Mensagens</h1>
       {conversations.size ? (
         <ul className="space-y-3">
-          {[...conversations.values()].map(({ other, last, unread }) => (
-            <li key={other.id}>
-              <Link href={`/messages/${other.id}`} className="card block hover:border-indigo-300">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-medium">
-                    {other.name}
-                    {unread > 0 && <span className="tag ml-2">{unread} por ler</span>}
-                  </span>
-                  <span className="text-xs text-zinc-500">{formatDate(last.createdAt)}</span>
+          {[...conversations.values()].map(({ other, last, unread }, i) => (
+            <li key={other.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
+              <Link href={`/messages/${other.id}`} className="card card-hover flex items-center gap-4">
+                <Avatar id={other.id} name={other.name} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="truncate font-display font-semibold">{other.name}</span>
+                    <span className="shrink-0 text-xs text-muted">{formatDate(last.createdAt)}</span>
+                  </div>
+                  <p className={`truncate text-sm ${unread ? 'text-fg' : 'text-muted'}`}>
+                    {last.sender.id === me.id && 'Tu: '}
+                    {last.message}
+                  </p>
                 </div>
-                <p className="truncate text-sm text-zinc-600">
-                  {last.sender.id === me.id && 'Tu: '}
-                  {last.message}
-                </p>
+                {unread > 0 && (
+                  <span className="bg-gradient-brand flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white">
+                    <span className="sr-only">Por ler: </span>
+                    {unread}
+                  </span>
+                )}
               </Link>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-zinc-500">
-          Ainda não tens mensagens.{' '}
-          <Link href="/" className="text-indigo-700 hover:underline">
-            Procura músicos
-          </Link>{' '}
-          e envia a primeira.
-        </p>
+        <div className="card flex flex-col items-center gap-3 py-12 text-center">
+          <MessageCircle className="size-8 text-muted" aria-hidden="true" />
+          <p className="text-muted">Ainda não tens mensagens.</p>
+          <Link href="/" className="btn-secondary">
+            Procurar músicos
+          </Link>
+        </div>
       )}
     </div>
   );

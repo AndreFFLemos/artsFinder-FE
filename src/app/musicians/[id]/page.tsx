@@ -1,7 +1,9 @@
+import { MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { ActionForm } from '@/components/action-form';
+import { Avatar } from '@/components/avatar';
 import { Loading } from '@/components/loading';
 import { SpecialtyTags } from '@/components/specialties';
 import { sendMessage } from '@/lib/actions';
@@ -34,34 +36,40 @@ async function MusicianContent(props: PageProps<'/musicians/[id]'>) {
 
   return (
     <div className="space-y-8">
-      <section className="card space-y-3">
-        <div className="flex items-baseline justify-between gap-2">
-          <h1 className="text-2xl font-semibold">{user.name}</h1>
-          <span className="text-zinc-500">{user.location}</span>
+      <section className="card bg-gradient-to-br from-violet-500/15 via-transparent to-orange-400/10 flex flex-col items-start gap-5 p-6 sm:flex-row sm:items-center">
+        <Avatar id={user.id} name={user.name} size="lg" />
+        <div className="space-y-3">
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight">{user.name}</h1>
+            <p className="flex items-center gap-1 text-muted">
+              <MapPin className="size-4" aria-hidden="true" />
+              {user.location}
+            </p>
+          </div>
+          <SpecialtyTags specialties={user.specialties} />
         </div>
-        <SpecialtyTags specialties={user.specialties} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Anúncios</h2>
+        <h2 className="font-display text-xl font-semibold">Anúncios</h2>
         {ads.length ? (
           <ul className="space-y-3">
             {ads.map((ad) => (
               <li key={ad.id} className="card">
-                <p className="font-medium">{ad.title}</p>
-                <p className="text-sm whitespace-pre-line text-zinc-700">{ad.body}</p>
-                <p className="mt-1 text-xs text-zinc-500">{formatDate(ad.created_at)}</p>
+                <p className="font-display font-semibold">{ad.title}</p>
+                <p className="text-sm whitespace-pre-line text-fg/80">{ad.body}</p>
+                <p className="mt-1 text-xs text-muted">{formatDate(ad.created_at)}</p>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-zinc-500">Sem anúncios.</p>
+          <p className="text-sm text-muted">Sem anúncios.</p>
         )}
       </section>
 
       {me?.id !== user.id && (
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Enviar mensagem</h2>
+          <h2 className="font-display text-xl font-semibold">Enviar mensagem</h2>
           {me ? (
             <ActionForm action={sendMessage} submitLabel="Enviar" className="card space-y-4">
               <input type="hidden" name="receiverId" value={user.id} />
@@ -79,8 +87,8 @@ async function MusicianContent(props: PageProps<'/musicians/[id]'>) {
               </div>
             </ActionForm>
           ) : (
-            <p className="text-sm text-zinc-600">
-              <Link href={`/login?next=/musicians/${user.id}`} className="text-indigo-700 hover:underline">
+            <p className="text-sm text-muted">
+              <Link href={`/login?next=/musicians/${user.id}`} className="link">
                 Entra
               </Link>{' '}
               para enviar uma mensagem.

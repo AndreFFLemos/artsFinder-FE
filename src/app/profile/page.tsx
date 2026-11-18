@@ -23,11 +23,11 @@ async function ProfileContent() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-semibold">O meu perfil</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">O meu perfil</h1>
       <ActionForm action={updateProfile} submitLabel="Guardar" className="card space-y-4">
         <div>
           <span className="label">Email</span>
-          <p className="text-sm text-zinc-600">{me.email}</p>
+          <p className="text-sm text-muted">{me.email}</p>
         </div>
         <div>
           <label htmlFor="name" className="label">

@@ -1,9 +1,13 @@
+import { ChevronLeft, ChevronRight, MapPin, SearchX } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { Loading } from '@/components/loading';
+import { Avatar } from '@/components/avatar';
+import { CardSkeleton } from '@/components/loading';
+import { SearchControls } from '@/components/search-controls';
+import { SoundWaves } from '@/components/sound-waves';
 import { SpecialtyTags } from '@/components/specialties';
 import { api } from '@/lib/api';
-import type { Paginated, Specialty, User } from '@/lib/types';
+import type { Ad, Paginated, Specialty, User } from '@/lib/types';
 
 const PAGE_SIZE = 20;
 
@@ -13,7 +17,7 @@ function first(value: string | string[] | undefined): string {
 
 export default function Home(props: PageProps<'/'>) {
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<HomeSkeleton />}>
       <HomeContent {...props} />
     </Suspense>
   );
@@ -24,16 +28,20 @@ async function HomeContent(props: PageProps<'/'>) {
   const specialtyId = first(searchParams.specialtyId);
   const location = first(searchParams.location).slice(0, 100);
   const page = Math.max(1, Number.parseInt(first(searchParams.page), 10) || 1);
+  const selectedId = /^\d+$/.test(specialtyId) ? Number(specialtyId) : null;
 
   const query = new URLSearchParams({ page: String(page), limit: String(PAGE_SIZE) });
-  if (/^\d+$/.test(specialtyId)) query.set('specialtyId', specialtyId);
+  if (selectedId) query.set('specialtyId', String(selectedId));
   if (location) query.set('location', location);
 
-  const [specialties, results] = await Promise.all([
+  const [specialties, results, everyone, ads] = await Promise.all([
     api<Specialty[]>('/specialties/all'),
     api<Paginated<User>>(`/user/search?${query}`),
+    api<Paginated<User>>('/user/search?limit=1'),
+    api<Ad[]>('/add/all'),
   ]);
   const totalPages = Math.max(1, Math.ceil(results.total / results.limit));
+  const filtered = selectedId !== null || location !== '';
 
   const pageHref = (p: number) => {
     const q = new URLSearchParams(query);
@@ -43,69 +51,110 @@ async function HomeContent(props: PageProps<'/'>) {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Encontra músicos com quem tocar</h1>
+    <div className="space-y-10">
+      <section className="relative overflow-hidden rounded-3xl border bg-surface/60 px-5 pt-10 pb-16 sm:px-10 sm:pt-14 sm:pb-24">
+        <SoundWaves />
+        <div className="relative space-y-6">
+          <div className="max-w-2xl space-y-3">
+            <h1 className="font-display text-4xl leading-[1.05] font-bold tracking-tight sm:text-6xl">
+              Encontra a tua <span className="text-gradient">próxima banda</span>
+            </h1>
+            <p className="text-base text-muted sm:text-lg">
+              Procura músicos por instrumento e localização, publica anúncios e combina o próximo ensaio.
+            </p>
+          </div>
+          <div className="card max-w-3xl bg-ink/70 p-4 sm:p-5">
+            <SearchControls specialties={specialties} selectedId={selectedId} initialLocation={location} />
+          </div>
+          <dl className="flex flex-wrap gap-x-8 gap-y-3">
+            <Stat value={everyone.total} label="músicos" />
+            <Stat value={ads.length} label="anúncios" />
+            <Stat value={specialties.length} label="instrumentos" />
+          </dl>
+        </div>
+      </section>
 
-      <form className="card flex flex-col gap-4 sm:flex-row sm:items-end">
-        <div className="flex-1">
-          <label htmlFor="specialtyId" className="label">
-            Instrumento
-          </label>
-          <select id="specialtyId" name="specialtyId" defaultValue={specialtyId} className="input">
-            <option value="">Todos</option>
-            {specialties.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
+      <section className="space-y-5" aria-live="polite">
+        <h2 className="font-display text-xl font-semibold">
+          {results.total === 1 ? '1 músico' : `${results.total} músicos`}
+          {filtered && <span className="text-muted"> para a tua pesquisa</span>}
+        </h2>
+
+        {results.items.length ? (
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {results.items.map((user, i) => (
+              <li key={user.id} className="animate-rise" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
+                <Link href={`/musicians/${user.id}`} className="card card-hover flex h-full gap-4">
+                  <Avatar id={user.id} name={user.name} />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div>
+                      <p className="truncate font-display text-lg leading-tight font-semibold">{user.name}</p>
+                      <p className="flex items-center gap-1 text-sm text-muted">
+                        <MapPin className="size-3.5" aria-hidden="true" />
+                        <span className="truncate">{user.location}</span>
+                      </p>
+                    </div>
+                    <SpecialtyTags specialties={user.specialties} />
+                  </div>
+                </Link>
+              </li>
             ))}
-          </select>
-        </div>
-        <div className="flex-1">
-          <label htmlFor="location" className="label">
-            Localização
-          </label>
-          <input id="location" name="location" defaultValue={location} maxLength={100} placeholder="ex.: Lisboa" className="input" />
-        </div>
-        <button type="submit" className="btn">
-          Pesquisar
-        </button>
-      </form>
-
-      <p className="text-sm text-zinc-600">
-        {results.total === 1 ? '1 músico encontrado' : `${results.total} músicos encontrados`}
-      </p>
-
-      <ul className="grid gap-4 sm:grid-cols-2">
-        {results.items.map((user) => (
-          <li key={user.id}>
-            <Link href={`/musicians/${user.id}`} className="card block space-y-2 hover:border-indigo-300">
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-medium">{user.name}</span>
-                <span className="text-sm text-zinc-500">{user.location}</span>
-              </div>
-              <SpecialtyTags specialties={user.specialties} />
+          </ul>
+        ) : (
+          <div className="card flex flex-col items-center gap-3 py-12 text-center">
+            <SearchX className="size-8 text-muted" aria-hidden="true" />
+            <p className="text-muted">Ainda não há músicos para esta pesquisa.</p>
+            <Link href="/" className="btn-secondary">
+              Limpar filtros
             </Link>
-          </li>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <nav className="flex items-center justify-center gap-4 text-sm" aria-label="Páginas">
+            {page > 1 && (
+              <Link href={pageHref(page - 1)} className="btn-secondary">
+                <ChevronLeft className="size-4" aria-hidden="true" />
+                Anterior
+              </Link>
+            )}
+            <span className="text-muted">
+              Página {page} de {totalPages}
+            </span>
+            {page < totalPages && (
+              <Link href={pageHref(page + 1)} className="btn-secondary">
+                Seguinte
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Link>
+            )}
+          </nav>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex items-baseline gap-2">
+      <dt className="sr-only">{label}</dt>
+      <dd className="font-display text-3xl font-bold">{value}</dd>
+      <span aria-hidden="true" className="text-sm text-muted">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function HomeSkeleton() {
+  return (
+    <div className="space-y-10" role="status" aria-label="A carregar">
+      <div className="skeleton h-96 rounded-3xl" />
+      <div className="grid gap-4 sm:grid-cols-2">
+        {Array.from({ length: 4 }, (_, i) => (
+          <CardSkeleton key={i} />
         ))}
-      </ul>
-
-      {totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-4 text-sm">
-          {page > 1 && (
-            <Link href={pageHref(page - 1)} className="btn-secondary">
-              Anterior
-            </Link>
-          )}
-          <span>
-            Página {page} de {totalPages}
-          </span>
-          {page < totalPages && (
-            <Link href={pageHref(page + 1)} className="btn-secondary">
-              Seguinte
-            </Link>
-          )}
-        </nav>
-      )}
+      </div>
     </div>
   );
 }

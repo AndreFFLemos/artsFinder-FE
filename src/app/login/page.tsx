@@ -20,7 +20,7 @@ async function LoginContent(props: PageProps<'/login'>) {
 
   return (
     <div className="mx-auto max-w-sm space-y-6">
-      <h1 className="text-2xl font-semibold">Entrar</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">Entrar</h1>
       <ActionForm action={login} submitLabel="Entrar" className="card space-y-4">
         <input type="hidden" name="next" value={typeof next === 'string' ? next : '/'} />
         <div>
@@ -36,9 +36,9 @@ async function LoginContent(props: PageProps<'/login'>) {
           <input id="password" name="password" type="password" required autoComplete="current-password" className="input" />
         </div>
       </ActionForm>
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm text-muted">
         Ainda não tens conta?{' '}
-        <Link href="/register" className="text-indigo-700 hover:underline">
+        <Link href="/register" className="link">
           Cria uma
         </Link>
       </p>

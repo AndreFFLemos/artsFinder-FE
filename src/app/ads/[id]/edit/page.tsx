@@ -34,7 +34,7 @@ async function EditAdContent(props: PageProps<'/ads/[id]/edit'>) {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-semibold">Editar anúncio</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">Editar anúncio</h1>
       <ActionForm action={updateAd.bind(null, ad.id)} submitLabel="Guardar" className="card space-y-4">
         <div>
           <label htmlFor="title" className="label">

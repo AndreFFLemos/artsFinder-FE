@@ -2,25 +2,125 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-space-grotesk);
+  --color-ink: #08080e;
+  --color-surface: #12121b;
+  --color-raised: #1b1b28;
+  --color-line: #2a2a3b;
+  --color-muted: #9d9db5;
+  --color-fg: #ededf6;
+  --color-brand: #c4a1ff;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-magenta: #d946ef;
+  --color-brand-orange: #fb923c;
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-wave: wave 1.4s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+  body {
+    background-color: var(--color-ink);
+    background-image:
+      radial-gradient(60rem 30rem at 15% -10%, rgb(139 92 246 / 0.18), transparent 60%),
+      radial-gradient(50rem 28rem at 95% 0%, rgb(251 146 60 / 0.1), transparent 60%);
+    background-attachment: fixed;
+    color: var(--color-fg);
+  }
+  ::selection {
+    background: rgb(217 70 239 / 0.35);
+  }
+}
+
+@utility bg-gradient-brand {
+  background-image: linear-gradient(110deg, var(--color-brand-violet), var(--color-brand-magenta) 55%, var(--color-brand-orange));
 }
 
 @layer components {
+  .text-gradient {
+    @apply bg-gradient-brand bg-clip-text text-transparent;
+  }
   .card {
-    @apply rounded-lg border border-zinc-200 bg-white p-4 shadow-sm;
+    @apply rounded-xl border bg-surface/80 p-4 backdrop-blur-sm;
+  }
+  .card-hover {
+    @apply transition duration-200 hover:-translate-y-0.5 hover:border-violet-400/50 hover:shadow-[0_8px_30px_-8px_rgb(139_92_246/0.45)];
   }
   .label {
-    @apply mb-1 block text-sm font-medium text-zinc-700;
+    @apply mb-1 block text-sm font-medium text-fg/80;
   }
   .input {
-    @apply w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500;
+    @apply w-full rounded-lg border bg-raised px-3 py-2 text-sm text-fg placeholder:text-muted/60 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30;
   }
   .btn {
-    @apply inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50;
+    @apply bg-gradient-brand inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_20px_-6px_rgb(217_70_239/0.6)] transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border bg-raised px-4 py-2 text-sm font-medium text-fg transition hover:border-violet-400/50;
   }
+  .link {
+    @apply text-brand hover:underline;
+  }
+  /* A cor vem de --h (matiz) definido pelo componente */
   .tag {
-    @apply inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700;
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+    background: oklch(0.32 0.08 var(--h, 295) / 0.55);
+    color: oklch(0.86 0.12 var(--h, 295));
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border bg-surface/70 px-3 py-1.5 text-sm text-muted transition hover:text-fg;
+  }
+  .chip[aria-current='true'],
+  .chip:has(input:checked) {
+    color: oklch(0.92 0.08 var(--h, 295));
+    border-color: oklch(0.7 0.16 var(--h, 295) / 0.7);
+    background: oklch(0.3 0.09 var(--h, 295) / 0.6);
+  }
+  .skeleton {
+    @apply rounded-lg bg-[length:200%_100%] animate-shimmer;
+    background-image: linear-gradient(90deg, var(--color-raised) 30%, #262637 50%, var(--color-raised) 70%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

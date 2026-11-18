@@ -19,7 +19,7 @@ async function NewAdContent() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-semibold">Novo anúncio</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">Novo anúncio</h1>
       <ActionForm action={createAd} submitLabel="Publicar" className="card space-y-4">
         <div>
           <label htmlFor="title" className="label">
